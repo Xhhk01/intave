@@ -11,8 +11,32 @@
 
 package de.jpx3.intave.packet.reader;
 
+import com.comphenix.protocol.reflect.StructureModifier;
+import de.jpx3.intave.adapter.MinecraftVersions;
+import de.jpx3.intave.annotate.Nullable;
+import de.jpx3.intave.share.PositionAndRotation;
+
 public final class TeleportAcceptReader extends AbstractPacketReader {
 	public int teleportId() {
 		return packet().getIntegers().read(0);
+	}
+
+	/**
+	 * Minecraft 26.3 replaced the separate acknowledgement and movement response
+	 * with one packet carrying the position and rotation after applying the teleport.
+	 */
+	public @Nullable PositionAndRotation positionAndRotation() {
+		if (MinecraftVersions.VER26_3.below()) {
+			return null;
+		}
+		StructureModifier<Double> position = packet().getDoubles();
+		StructureModifier<Float> rotation = packet().getFloat();
+		if (position.size() < 3 || rotation.size() < 2) {
+			return null;
+		}
+		return new PositionAndRotation(
+			position.read(0), position.read(1), position.read(2),
+			rotation.read(0), rotation.read(1)
+		);
 	}
 }

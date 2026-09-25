@@ -7,6 +7,7 @@ import de.jpx3.intave.share.*;
 import de.jpx3.intave.user.User;
 import de.jpx3.intave.user.UserFactory;
 import de.jpx3.intave.user.meta.MovementMetadata;
+import de.jpx3.intave.user.meta.ProtocolMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.*;
@@ -122,6 +123,43 @@ class TeleportRetryOrderingTest {
     assertTrue(confirm(retry));
     assertEquals(74, movement.verifiedLastPosition().getY());
     assertEquals(0.5, movement.mutableBaseMotionCopy().motionY());
+  }
+
+  @Test void minecraft263CombinedAcceptCompletesTeleportWithoutAnotherMovementResponse() {
+    MinecraftVersion.setCurrent(MinecraftVersions.VER26_3);
+    user.meta().protocol().setProtocolVersion(ProtocolMetadata.VER_26_3);
+    controller.teleport(user, change(5, 0), EnumSet.of(Relative.Y));
+    Teleport teleport = sent.get(0);
+    controller.beforeTeleportTransactionReceive(user, teleport);
+
+    controller.receiveTeleportAccept(
+      user,
+      teleport.id().getAsInt(),
+      new PositionAndRotation(0, 69, 0, 0, 0)
+    );
+
+    assertTrue(teleport.wasAccepted());
+    assertTrue(movement.pendingTeleports.get().isEmpty());
+    assertEquals(new Position(0, 69, 0), movement.verifiedLastPosition());
+    assertFalse(controller.confirmTeleport(user, new Position(0, 68.995, 0), Rotation.zero()));
+  }
+
+  @Test void pre263AcceptStillWaitsForSeparateMovementResponse() {
+    MinecraftVersion.setCurrent(MinecraftVersions.VER26_3);
+    user.meta().protocol().setProtocolVersion(ProtocolMetadata.VER_26_2);
+    controller.teleport(user, change(5, 0), EnumSet.of(Relative.Y));
+    Teleport teleport = sent.get(0);
+    controller.beforeTeleportTransactionReceive(user, teleport);
+
+    controller.receiveTeleportAccept(
+      user,
+      teleport.id().getAsInt(),
+      new PositionAndRotation(0, 69, 0, 0, 0)
+    );
+
+    assertFalse(teleport.wasAccepted());
+    assertEquals(teleport, movement.pendingTeleports.get().peekFirst());
+    assertTrue(controller.confirmTeleport(user, new Position(0, 69, 0), Rotation.zero()));
   }
 
   private PositionMoveRotation change(double y, double velocityY) {
