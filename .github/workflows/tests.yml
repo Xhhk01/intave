@@ -51,6 +51,14 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - uses: actions/cache@v6
+        with:
+          path: |
+            runs/test_*/cache/*.jar
+            runs/test_*/versions/**.jar
+            runs/test_*/libraries/**.jar
+          key: mc-${{matrix.version}}-${{ hashFiles(format('libs/*-{0}*jar', matrix.version), format('libs/servers/*-{0}*jar', matrix.version)) }}
+
       - name: Run Paper self-test
         env:
           MINECRAFT_VERSION: ${{ matrix.version }}
