@@ -66,12 +66,3 @@ By doing so, you can run the plugin directly in the IDE. Breakpoints and hotswap
 enabled!
 We use [this IntelliJ plugin](https://plugins.jetbrains.com/plugin/14832-single-hotswap) for efficient hotswapping, which
 can swap method contents that don't have an indy lambda or anonymous class.
-
-## Contributing
-
-We accept contributions to the project, but please make sure to read the [contributing guidelines](docs/CONTRIBUTING.md) before doing so.
-For a high-level overview of the project organization, see [this document](docs/STRUCTURE.md).
-A cheatsheet can be found [here](docs/CHEATSHEET.md) to quickly find your way around the codebase, contributions welcome!
-Our block system is briefly outlined in [this document](docs/BLOCK_SYSTEM.md).
-If you have any questions, feel free to get in touch with us on [Discord](https://intave.ac/go/discord).
-
