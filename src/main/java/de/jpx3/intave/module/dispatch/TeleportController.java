@@ -34,6 +34,7 @@ import de.jpx3.intave.packet.reader.PlayerTeleportReader;
 import de.jpx3.intave.packet.reader.TeleportAcceptReader;
 import de.jpx3.intave.player.ActionBar;
 import de.jpx3.intave.share.Position;
+import de.jpx3.intave.share.PositionAndRotation;
 import de.jpx3.intave.share.PositionMoveRotation;
 import de.jpx3.intave.share.Rotation;
 import de.jpx3.intave.share.Teleport;
@@ -161,9 +162,16 @@ public final class TeleportController implements PacketEventSubscriber {
 	public void receiveTeleportAccept(
 		User user, TeleportAcceptReader reader
 	) {
+		receiveTeleportAccept(user, reader.teleportId(), reader.positionAndRotation());
+	}
+
+	void receiveTeleportAccept(User user, int teleportId, PositionAndRotation acceptedState) {
 		MovementMetadata movementData = user.meta().movement();
-		movementData.lastTeleportAcceptId = reader.teleportId();
+		movementData.lastTeleportAcceptId = teleportId;
 		movementData.sentTeleportIdBefore = true;
+		if (acceptedState != null && user.meta().protocol().teleportAcceptIncludesPositionAndRotation()) {
+			confirmTeleport(user, acceptedState.position(), acceptedState.rotation());
+		}
 	}
 
 	public boolean setbackTeleportsAllowed(User user) {

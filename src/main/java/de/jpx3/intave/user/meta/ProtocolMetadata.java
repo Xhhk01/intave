@@ -158,6 +158,10 @@ public final class ProtocolMetadata {
     return protocolVersion >= VER_1_9 && MinecraftVersions.VER1_9_0.atOrAbove();
   }
 
+  public boolean teleportAcceptIncludesPositionAndRotation() {
+    return protocolVersion == VER_26_3;
+  }
+
   public boolean legacyTeleportRelativeMotionBehavior() {
     return protocolVersion >= VER_1_8 && protocolVersion <= VER_1_13_2;
   }
